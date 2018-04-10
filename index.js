@@ -5,11 +5,25 @@ var compression = require("compression");
 var morgan      = require("morgan");
 var PORT        = Number( process.env.PORT || 3000 );
 var Counters    = require("./lib/Counters");
+var cors = require('cors');
+
+var whitelist = ['http://localhost:5000']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+
 
 app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(compression());
+app.use(cors());
 
 function sendFile(name) {
   return function(req, res) {
@@ -37,6 +51,7 @@ app.get("/api/v1/counters", function(req, res) {
 // =>   {id: "qwer", title: "bob",   count: 0}
 // => ]
 app.post("/api/v1/counter", function(req, res) {
+    console.log("req.body", req.body);
   res.json(Counters.create(req.body.title));
 })
 
